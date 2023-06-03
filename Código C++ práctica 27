@@ -1,0 +1,60 @@
+// Realización del conexionado de la ESP8266 a wifi móbil
+// Mehdi boumhara farhane
+
+#include <ESP8266WiFi.h>
+
+//Wifi móbil
+#define MAX_INTENTOS 50
+#define WIFI_SSID "Robotica"
+#define WIFI_PASS "pass1234"
+
+// Pins datos
+// GPIO14: D5
+#define LED 14
+int tempo = 500;
+bool conectado = false;
+
+void setup() {
+  
+  Serial.begin(9600);
+  pinMode(LED, OUTPUT);
+  conectado = conectarWiFi();
+}
+
+void loop() {
+  if(conectado) escintila(tempo);
+  else escintila(tempo/10);
+}
+
+void escintila(int espera) {
+  digitalWrite(LED, HIGH);
+  delay(espera);
+  digitalWrite(LED, LOW);
+  delay(espera);
+}
+
+// Función que se encarga de gestionar la conexión a la red
+bool conectarWiFi() { // Respuesta en verdadero o falso
+  
+  WiFi.mode(WIFI_STA); //Indica conexion a outro dispositivo
+  WiFi.disconnect(); // Desconecta una posible conexion previa
+  WiFi.begin(WIFI_SSID, WIFI_PASS); // Inicia la conexion
+  Serial.print("\n\nAgardando pola WiFi ");
+  int contador = 0; // Comprueba el estado de la conexión 
+  while(WiFi.status() != WL_CONNECTED and contador < MAX_INTENTOS) {
+    contador++;
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  // Informa del estado de la conexion y IP 
+  if(contador < MAX_INTENTOS) {
+    conectado = true;
+    Serial.print("Conectado á WiFi coa IP: "); Serial.println(WiFi.localIP());
+  }
+  else{
+    Serial.println("Non se puido conectar á WiFi");
+    conectado = false;
+  }
+  return(conectado);
+}
